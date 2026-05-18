@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>京都旅遊行程</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --ink: #1a1814;
+    --ink2: #4a4640;
+    --ink3: #8a8480;
+    --paper: #faf8f4;
+    --paper2: #f2ede4;
+    --paper3: #e8e0d4;
+    --red: #c0392b;
+    --red-soft: #f5e6e4;
+    --amber: #b5651d;
+    --amber-soft: #fdf3e7;
+    --green: #2d6a4f;
+    --green-soft: #e8f4ee;
+    --blue: #1a5276;
+    --blue-soft: #e8f0f8;
+    --purple: #6c3483;
+    --purple-soft: #f0e8f8;
+    --accent: #c0392b;
+    --serif: 'Noto Serif TC', serif;
+    --sans: 'Noto Sans TC', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .app-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 20px 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .trip-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .trip-subtitle {
+    font-size: 11px;
+    color: #a0988c;
+    margin-top: 3px;
+    letter-spacing: 0.06em;
+  }
+  .offline-badge {
+    background: #2d6a4f;
+    color: #a8e6c8;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* Day tabs */
+  .day-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab {
+    flex-shrink: 0;
+    padding: 10px 16px 12px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: #7a7068;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .day-tab.active {
+    color: var(--paper);
+    border-bottom-color: var(--accent);
+  }
+  .day-tab:hover:not(.active) { color: #c8beb4; }
+
+  /* Day panels */
+  .day-panel { display: none; padding: 0 0 80px; }
+  .day-panel.active { display: block; }
+
+  /* Day banner */
+  .day-banner {
+    background: var(--paper2);
+    border-bottom: 1px solid var(--paper3);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .day-banner-left { }
+  .day-number {
+    font-family: var(--serif);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .day-date {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 1px;
+    font-family: var(--serif);
+  }
+  .day-theme {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 2px;
+  }
+  .day-weather {
+    font-size: 24px;
+    opacity: 0.6;
+  }
+
+  /* Alert bar */
+  .alert-bar {
+    margin: 12px 16px 0;
+    background: #fff8f0;
+    border: 1px solid #f0c070;
+    border-left: 3px solid var(--amber);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .alert-text { font-size: 12px; color: #7a4f10; line-height: 1.5; }
+  .alert-text strong { font-weight: 500; }
+
+  /* Section label */
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 16px 20px 6px;
+  }
+
+  /* Timeline */
+  .timeline { padding: 0 16px; }
+
+  .tl-item {
+    display: flex;
+    gap: 12px;
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .tl-item:last-child .tl-line { display: none; }
+
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 44px;
+    flex-shrink: 0;
+  }
+  .tl-time {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink3);
+    text-align: center;
+    line-height: 1.3;
+    padding-top: 14px;
+    width: 44px;
+  }
+  .tl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--paper3);
+    border: 1.5px solid var(--ink3);
+    flex-shrink: 0;
+    margin-top: 6px;
+    z-index: 1;
+  }
+  .tl-dot.priority { background: var(--accent); border-color: var(--accent); }
+  .tl-dot.warning { background: var(--amber); border-color: var(--amber); }
+  .tl-dot.transport { background: var(--paper3); border-color: var(--paper3); }
+  .tl-line {
+    width: 1px;
+    flex: 1;
+    background: var(--paper3);
+    margin-top: 2px;
+    min-height: 16px;
+  }
+
+  .tl-right {
+    flex: 1;
+    padding-bottom: 14px;
+  }
+
+  /* Cards */
+  .card {
+    background: white;
+    border: 1px solid var(--paper3);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2px;
+  }
+  .card.warning-card { border-color: #f0c070; border-left: 3px solid var(--amber); }
+  .card.danger-card { border-color: #e8a090; border-left: 3px solid var(--red); }
+
+  .card-head {
+    padding: 11px 14px 10px;
+  }
+  .card-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+    flex: 1;
+  }
+  .card-body {
+    padding: 0 14px 12px;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+
+  /* Tags */
+  .tag {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+  .tag-red { background: var(--red-soft); color: var(--red); }
+  .tag-amber { background: var(--amber-soft); color: var(--amber); }
+  .tag-green { background: var(--green-soft); color: var(--green); }
+  .tag-blue { background: var(--blue-soft); color: var(--blue); }
+  .tag-purple { background: var(--purple-soft); color: var(--purple); }
+  .tag-gray { background: var(--paper2); color: var(--ink3); }
+
+  /* Info rows */
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+  .info-icon { flex-shrink: 0; font-size: 11px; margin-top: 1px; }
+
+  /* Divider in card */
+  .card-divider {
+    border: none;
+    border-top: 1px solid var(--paper2);
+    margin: 6px 14px;
+  }
+
+  /* Alt options */
+  .alt-section { margin-top: 8px; }
+  .alt-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 5px;
+  }
+  .alt-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--paper2);
+  }
+  .alt-item:last-child { border-bottom: none; }
+  .alt-name {
+    font-size: 12px;
+    color: var(--ink2);
+    flex: 1;
+    line-height: 1.4;
+  }
+  .alt-meta {
+    font-size: 11px;
+    color: var(--ink3);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .alt-star { color: var(--amber); font-style: normal; }
+
+  /* Transport node */
+  .transport-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--paper2);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--ink3);
+  }
+  .transport-icon { font-size: 14px; }
+
+  /* Map link */
+  .map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--blue);
+    text-decoration: none;
+    margin-top: 5px;
+  }
+  .map-link:active { opacity: 0.7; }
+
+  /* Collapsible */
+  .collapsible-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink3);
+    cursor: pointer;
+    border-top: 1px solid var(--paper2);
+    font-family: var(--sans);
+  }
+  .collapsible-toggle .arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+  .collapsible-toggle.open .arrow { transform: rotate(180deg); }
+  .collapsible-body { display: none; padding: 0 14px 12px; }
+  .collapsible-body.open { display: block; }
+
+  /* Bottom summary bar */
+  .summary-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(26,24,20,0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 10px 20px 20px;
+    display: flex;
+    gap: 12px;
+    z-index: 200;
+  }
+  .summary-item {
+    flex: 1;
+    text-align: center;
+  }
+  .summary-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paper);
+    display: block;
+  }
+  .summary-key {
+    font-size: 10px;
+    color: #7a7068;
+    margin-top: 1px;
+    display: block;
+  }
+  .summary-divider {
+    width: 1px;
+    background: #3a3830;
+    align-self: stretch;
+  }
+
+  /* Empty state */
+  .coming-soon {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--ink3);
+  }
+  .coming-soon .icon { font-size: 32px; margin-bottom: 12px; }
+  .coming-soon p { font-size: 13px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-top">
+    <div>
+      <div class="trip-title">京都旅遊行程</div>
+      <div class="trip-subtitle">2026年5月 · Japan ✈</div>
+    </div>
+    <div class="offline-badge">✓ 離線可用</div>
+  </div>
+  <div class="day-tabs" id="dayTabs">
+    <button class="day-tab active" onclick="switchDay(0)">Day 1<br><span style="font-size:10px;opacity:0.7">5/26</span></button>
+    <button class="day-tab" onclick="switchDay(1)">Day 2<br><span style="font-size:10px;opacity:0.7">5/27</span></button>
+    <button class="day-tab" onclick="switchDay(2)">Day 3<br><span style="font-size:10px;opacity:0.7">5/28</span></button>
+    <button class="day-tab" onclick="switchDay(3)">Day 4<br><span style="font-size:10px;opacity:0.7">5/29</span></button>
+    <button class="day-tab" onclick="switchDay(4)">Day 5<br><span style="font-size:10px;opacity:0.7">5/30</span></button>
+    <button class="day-tab" onclick="switchDay(5)">Day 6<br><span style="font-size:10px;opacity:0.7">5/31</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 1 ═══════════════ -->
+<div class="day-panel active" id="day0">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 1</div>
+      <div class="day-date">5月26日（二）</div>
+      <div class="day-theme">抵達 · 和服 · 東山 · 四条</div>
+    </div>
+    <div class="day-weather">⛩️</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>兩個截止時間：</strong>和服歸還 17:00 前・OS 藥妝 19:45 關門（現金only）</div>
+  </div>
+
+  <div class="section-label">✈️ 抵達 &amp; 移動</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">02:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Jetstar GK50 起飛</div>
+              <span class="tag tag-gray">KWZNRJ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:05</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">抵達關西機場 KIX</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">入境 → 取 Haruka 票（待確認預訂）→ 搭特急前往京都站（約 75 分鐘）</div>
+            <div class="info-row"><span class="info-icon">🚆</span><span>預計 07:30 抵達京都站</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">07:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">NANOHANA 宿舍 報到・放行李</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">搭公車 4 / 5 / 205 至河原町三条下車。辦理入住、放行李、整裝出發。</div>
+            <div class="info-row"><span class="info-icon">🗺</span><span>Iseyacho, Nakagyo Ward</span></div>
+            <a class="map-link" href="https://maps.google.com/?q=Woman+Only+Guesthouse+Nanohana+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🦌 和服體驗 &amp; 東山散步</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">09:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Okimono屋・清水店 租和服</div>
+              <span class="tag tag-red">⚠ 17:00歸還</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">挑選和服＋髮型。建議網路提前預約，到店更快。</div>
+            <div class="info-row"><span class="info-icon">🕘</span><span>營業 09:00–17:30</span></div>
+            <div class="info-row"><span class="info-icon">📍</span><span>東山区白糸町 569-9</span></div>
+            <a class="map-link" href="https://maps.google.com/?q=Okimonoya+Kiyomizu+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">清水寺 📷</div>
+              <span class="tag tag-blue">06:00–18:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">穿和服打卡清水舞台。建議先遊覽再下坡，避免踩到和服。入場需購票。</div>
+            <a class="map-link" href="https://maps.google.com/?q=Kiyomizudera+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">三年坂 → 二年坂 🚶</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">石板路散步，沿途可逛 🍵 茶碗坂、GOKAGO 日本茶専門店。找寶可夢水溝蓋！</div>
+            <div class="info-row"><span class="info-icon">⚠️</span><span>三年坂傳說：跌倒會帶來三年厄運，穿和服踩穩！</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">13:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">花見小路（祇園）</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">穿和服漫步，有機會遇見藝妓。拍照留念。</div>
+            <a class="map-link" href="https://maps.google.com/?q=Hanamikoji+Street+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">15:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⚠️ 返回 Okimono屋 歸還和服</div>
+              <span class="tag tag-red">最晚 17:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">從花見小路步行約 15 分鐘。歸還後換回自己衣服，輕裝前往四条河原町。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚌&nbsp; 公車 or 步行前往四条河原町（約 15–20 分鐘）
+    </div>
+  </div>
+
+  <div class="section-label">🍱 晚餐</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">晚餐（鰻魚飯）</div>
+              <span class="tag tag-amber">5/26 星期二</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">主選</div>
+              <div class="alt-item">
+                <div class="alt-name"><i class="alt-star">★</i> 炭櫓 京都四条河原町店</div>
+                <div class="alt-meta">17:00–21:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">京うなわ Kyo Unawa ¥5,500</div>
+                <div class="alt-meta">確認官網</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">うなぎ鰻吉 ¥2,800</div>
+                <div class="alt-meta">17:00–21:00</div>
+              </div>
+            </div>
+            <button class="collapsible-toggle" onclick="toggleCollapsible(this)">備用選項 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item">
+              <div class="alt-name">麺屋優光（拉麵・推薦淡竹）</div>
+              <div class="alt-meta">11:00–00:00</div>
+            </div>
+            <div class="alt-item">
+              <div class="alt-name">タコハイ 章魚燒 錦市場 ¥500~</div>
+              <div class="alt-meta">–20:00</div>
+            </div>
+            <div class="alt-item">
+              <div class="alt-name">高島屋 8F 鰻魚飯 ¥4,680</div>
+              <div class="alt-meta">依樓層</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">🛍️ 購物</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">18:30</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⭐ OS 藥妝（新京極通）</div>
+              <span class="tag tag-red">19:45 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">DHC、保健食品。⚠️ 現金 only。吃完晚餐第一站就去！</div>
+            <a class="map-link" href="https://maps.google.com/?q=OS+Drug+Store+Shinkyogoku+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">19:45</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Nintendo KYOTO（高島屋 7F）</div>
+              <span class="tag tag-amber">20:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">1F 寶可夢中心拿禮物 → 7F 逛任天堂。8F 屋頂拍馬力歐旗桿！</div>
+            <a class="map-link" href="https://maps.google.com/?q=Nintendo+KYOTO+Takashimaya" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">20:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">KiddyLand / Chiikawa Kyoto</div>
+              <span class="tag tag-green">21:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">Chiikawa、Miffy、Rilakkuma 三層樓。滿 ¥5,500 可退稅。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">21:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">松本清 新京極店</div>
+              <span class="tag tag-green">22:30 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">藥妝補貨。鄰近 ABC Mart，可順路看鞋（KEEN 在大丸 3F）。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">彈性</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">備用購物清單</div>
+              <span class="tag tag-purple">視時間</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <button class="collapsible-toggle" style="border-top:none;padding:0 0 4px;" onclick="toggleCollapsible(this)">展開查看 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">mont-bell 京都店 ~¥2,000</div><div class="alt-meta">依官網</div></div>
+            <div class="alt-item"><div class="alt-name">KEEN 大丸 3F（速速看鞋）</div><div class="alt-meta">依百貨</div></div>
+            <div class="alt-item"><div class="alt-name">ABC Mart</div><div class="alt-meta">21:00</div></div>
+            <div class="alt-item"><div class="alt-name">愛電王（電捲棒 / 離子夾）</div><div class="alt-meta">依官網</div></div>
+            <div class="alt-item"><div class="alt-name">C-pla 寺町京極店</div><div class="alt-meta">22:00</div></div>
+            <div class="alt-item"><div class="alt-name">扭蛋店</div><div class="alt-meta">約 21:00</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">22:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回 NANOHANA 洗澡休息 🏠</div>
+              <span class="tag tag-green">早點回去</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">明天起每天都要早起！盡量 22:30 前回宿舍。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 2 ═══════════════ -->
+<div class="day-panel" id="day1">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 2</div>
+      <div class="day-date">5月27日（三）</div>
+      <div class="day-theme">伏見稻荷 · 宇治抹茶 · 返京都</div>
+    </div>
+    <div class="day-weather">⛩️</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>關鍵截止：</strong>平等院最後入場 16:10・中村藤吉 17:00 關・SOUP CURRY 17:30 開 20:30 收單</div>
+  </div>
+
+  <div class="section-label">🌅 早晨 — 伏見稻荷大社</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">05:20</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">起床、出發準備</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">出門 → JR 稻荷站</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">從 NANOHANA 步行或搭公車至京都站，轉 JR 奈良線至稻荷站（約 5 分鐘）。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">伏見稻荷大社 ⛩️ 千本鳥居</div>
+              <span class="tag tag-green">24小時</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">早到人少！走到奧社奉拜所來回約 1.5 小時。越早越好拍，光線也漂亮。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=8870624639634301673" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">09:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">吉伊卡哇 伏見稻荷店 🛍️</div>
+              <span class="tag tag-blue">09:30–17:30</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">稻荷限定商品！從神社步行約 3 分鐘，遊完鳥居後回來買。傳統町家建築，記得帶紙本來蓋章！</div>
+            <a class="map-link" href="https://maps.google.com/?cid=7308881058142822545" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚆&nbsp; JR 稻荷 → 宇治（JR 奈良線，約 30 分鐘，¥240）
+    </div>
+  </div>
+
+  <div class="section-label">🍵 上午～下午 — 宇治（抹茶聖地）</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">抵達宇治站</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">出站後沿宇治橋通步行，宇治的主要景點皆在步行範圍內。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=85353625785447038" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">午餐</div>
+              <span class="tag tag-amber">人潮決定</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">主選</div>
+              <div class="alt-item">
+                <div class="alt-name">⭐ 伊藤久右衛門（站前店）抹茶拉麵/蕎麥麵 ¥1,446</div>
+                <div class="alt-meta">10:00–18:00</div>
+              </div>
+            </div>
+            <button class="collapsible-toggle" onclick="toggleCollapsible(this)">備用選項 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">京うどん 三よしや（鴨肉拉麵）</div><div class="alt-meta">確認官網</div></div>
+            <div class="alt-item"><div class="alt-name">豬一拉麵 ¥1,550（有蛋）</div><div class="alt-meta">確認官網</div></div>
+            <div class="alt-item"><div class="alt-name">現場決定其他選項</div><div class="alt-meta">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:45</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Mogmog Bakery 抹茶麵包 🥐</div>
+              <span class="tag tag-green">06:00–18:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">出站即到，買抹茶麵包邊走邊吃。⚠️ 週一、二公休，5/27 星期三有開。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=2607371569082109061" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:15</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">平等院 🪙</div>
+              <span class="tag tag-red">最後入場 16:10</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">日本 10 元硬幣的圖案！提早抵達避開下午大批團客，光線最完美，順利買到鳳凰堂內部參觀券。開放 08:45–17:30。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=6954706348575164324" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">13:45</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">下午茶 🍵</div>
+              <span class="tag tag-amber">黃金交叉點</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">主選</div>
+              <div class="alt-item">
+                <div class="alt-name">中村藤吉 平等院店（抹茶聖代 ¥1,650~）</div>
+                <div class="alt-meta">10:00–17:00</div>
+              </div>
+            </div>
+            <button class="collapsible-toggle" onclick="toggleCollapsible(this)">備用選項 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item">
+              <div class="alt-name">三星園 上林三入本店（冰淇淋，人少不排隊）</div>
+              <div class="alt-meta">10:00–17:00</div>
+            </div>
+          </div>
+          <div class="card-body" style="padding-top:0">
+            <div class="info-row"><span class="info-icon">💡</span><span>下午茶剛開始的黃金時段。如果中村藤吉人太多，直接去三星園既能休息又不用花大把時間排隊。</span></div>
+            <a class="map-link" href="https://maps.google.com/?cid=10051035911729796903" target="_blank">📍 中村藤吉 Google Maps</a>
+            <a class="map-link" href="https://maps.app.goo.gl/MrQTc12Da91T6nM36" target="_blank">📍 三星園 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">14:45</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">紫式部石像 📷 + Hoho Hojicha</div>
+              <span class="tag tag-blue">10:00–18:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">沿著宇治川散步打卡《源氏物語》作者紫式部石像，順手買 Hoho Hojicha 焙茶。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=14637179714169975436" target="_blank">📍 紫式部石像 Google Maps</a>
+            <a class="map-link" href="https://maps.google.com/?cid=12793137848714063856" target="_blank">📍 Hoho Hojicha Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">15:15</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">抹茶採購 🍵</div>
+              <span class="tag tag-green">人潮減緩</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">此時商店街人潮稍微減緩，悠閒購入「宇治昔」與中村藤吉抹茶粉。</div>
+            <div class="alt-section">
+              <div class="alt-label">推薦店家</div>
+              <div class="alt-item">
+                <div class="alt-name">堀井七茗園（宇治昔抹茶粉）</div>
+                <div class="alt-meta">09:00–18:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">中村藤吉本店（抹茶粉、伴手禮）</div>
+                <div class="alt-meta">10:00–17:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">16:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Appro 食品館 🛒</div>
+              <span class="tag tag-green">09:30–21:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">最後大採購！買丸久小山園抹茶粉「青嵐（Seiran）」＋簡單晚餐備用（便當、熟食）。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=10527272125077852245" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">16:45</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">賦歸 🚶</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">步行 5 分鐘回 JR 宇治站搭車返回京都。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚆&nbsp; JR 宇治 → 京都站（JR 奈良線，約 30 分鐘）→ 步行回 NANOHANA
+    </div>
+  </div>
+
+  <div class="section-label">🌆 傍晚 — 返回京都</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回 NANOHANA 放東西</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">放下宇治戰利品，換身舒適衣服再出門。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">晚餐 — 備用路線選一</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">主選 ⭐⭐⭐</div>
+              <div class="alt-item">
+                <div class="alt-name">SOUP CURRY OHMIYA 雞肉咖喱 ¥1,380（2樓，容易客滿）</div>
+                <div class="alt-meta">17:30–20:30</div>
+              </div>
+            </div>
+            <button class="collapsible-toggle" onclick="toggleCollapsible(this)">備用選項 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">Appro 買的便當回宿舍吃（邊收拾行李）</div><div class="alt-meta">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">彈性</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">傍晚備用活動</div>
+              <span class="tag tag-purple">視精力</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <button class="collapsible-toggle" style="border-top:none;padding:0 0 4px;" onclick="toggleCollapsible(this)">展開查看 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">鴨川三角洲散步（踩烏龜石）免費，可隔天早上去</div><div class="alt-meta">24小時</div></div>
+            <div class="alt-item"><div class="alt-name">Nintendo KYOTO（Day 1 沒逛完可補）</div><div class="alt-meta">20:00</div></div>
+            <div class="alt-item"><div class="alt-name">大創採購生活用品</div><div class="alt-meta">依門市</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">21:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回宿舍 收拾行李、早點睡 🏠</div>
+              <span class="tag tag-green">早起準備</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">明天繼續早起！整理今天戰利品，準備行李。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 3 ═══════════════ -->
+<div class="day-panel" id="day2">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 3</div>
+      <div class="day-date">5月28日（四）</div>
+      <div class="day-theme">京都退房 · 前往大阪 · 難波購物</div>
+    </div>
+    <div class="day-weather">🏯</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>關鍵截止：</strong>木津市場 13:00・難波八阪神社 17:00・OS Drug 19:50・BIC CAMERA 22:00</div>
+  </div>
+
+  <div class="section-label">☀️ 上午 — 京都下鴨神社 &amp; 退房</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">05:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">起床、快速整理、早餐</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">下鴨神社 ⛩️</div>
+              <span class="tag tag-green">06:00–17:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">搭公車 5:30 後即有班次，車程約 25 分鐘。早晨人少，買蕾絲御守。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=241870519493552588" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">07:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">河合神社（美顏繪馬）</div>
+              <span class="tag tag-blue">09:00–16:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">在下鴨神社境內，步行 5 分鐘。寫美顏繪馬祈願。</div>
+            <a class="map-link" href="https://maps.google.com/?q=Kawai+Shrine+Kyoto" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">08:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回 NANOHANA 退房 🏠</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">搭公車回宿舍，整理行李、退房手續，前往京都站。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">京都站最後購物 🛍️</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">京都站伴手禮</div>
+              <div class="alt-item">
+                <div class="alt-name">丸久小山園 JR 京都伊勢丹店（B1F）抹茶粉</div>
+                <div class="alt-meta">10:00–20:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">Hoho Hojicha 京都站店（1F Kyo-Komachi）焙茶粉</div>
+                <div class="alt-meta">08:30–20:00</div>
+              </div>
+            </div>
+            <div class="info-row"><span class="info-icon">💡</span><span>如果在宇治已買到青嵐抹茶粉，這邊可跳過</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚄&nbsp; JR 京都 → 大阪（約 30 分鐘，¥570）
+    </div>
+  </div>
+
+  <div class="section-label">🏨 中午 — 抵達大阪 Check-in</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Orange Hotel Namba Check-in</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">放行李、整理，輕裝出發。位於難波區，交通便利。</div>
+            <a class="map-link" href="https://maps.app.goo.gl/3powbRVYA5V9qWdh8" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🍱 下午 — 新世界 &amp; 難波</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">13:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">木津市場 早午餐 🍣</div>
+              <span class="tag tag-red">13:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">海鮮丼、鰻魚飯！06:00–13:00 營業，⚠️ 週三、日公休（5/28 四有開）。務必 12:30 前抵達，現金 only。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=3254074959831400589" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">14:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">新世界 📷 復古街景</div>
+              <span class="tag tag-green">24小時</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">南陽通商店街拍照，昭和復古氛圍。各種巨大看板、串炸店林立。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=3913203720736569851" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">15:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">通天閣 🗼</div>
+              <span class="tag tag-blue">09:00–21:45</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">4 樓以上展望台可用周遊券。柯南照片打卡點。遠拍也很美。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=16495835293832459863" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">16:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">難波八阪神社 🦁</div>
+              <span class="tag tag-red">17:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">巨大獅子頭舞台！超震撼拍照點。06:30–17:00，免費參觀。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=9221890584603222431" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">16:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">難波公園 + 難波 CITY 購物 🛍️</div>
+              <span class="tag tag-green">11:00–23:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">購物清單</div>
+              <div class="alt-item">
+                <div class="alt-name">⚠️ Workman Girl（難波 CITY 南館 2F）睡衣、五隻襪</div>
+                <div class="alt-meta">~21:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">ABC-MART GRAND STAGE（難波公園 3F）</div>
+                <div class="alt-meta">~21:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">Sports Depo 大型鞋店（難波公園）</div>
+                <div class="alt-meta">~21:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">Alpen Outdoors + KEEN（難波公園 3F+4F）</div>
+                <div class="alt-meta">~21:00</div>
+              </div>
+            </div>
+            <a class="map-link" href="https://maps.google.com/?cid=17426084953494933348" target="_blank">📍 難波公園 Google Maps</a>
+            <a class="map-link" href="https://maps.app.goo.gl/jKJAZGH2HnTYd2m47" target="_blank">📍 Workman Girl Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">18:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">晚餐：北極星蛋包飯 🍛</div>
+              <span class="tag tag-blue">10:00–20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">高島屋大阪店 B1F。老字號蛋包飯專門店，提早吃避開人潮。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=9040056166055092301" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚇&nbsp; 地鐵/步行前往心齋橋（約 10 分鐘）
+    </div>
+  </div>
+
+  <div class="section-label">🌆 晚上 — 心齋橋 &amp; 道頓堀</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">19:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card danger-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⭐⭐⭐ OS Drug 心齋橋店</div>
+              <span class="tag tag-red">19:50 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">DHC + 拍價格紀錄對比。⚠️ 現金 only。京都已去可跳過，或只拍價格。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=10774913698555922259" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">19:50</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">道頓堀散策 📷</div>
+              <span class="tag tag-green">24小時</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">固力果跑跑人拍照 + 章魚燒 + 各種巨大看板 + 戎橋筋商店街氛圍。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=6542758871994013851" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">20:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">黑門市場 麵包超人販賣機 📷</div>
+              <span class="tag tag-green">24小時</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">順路打卡。丸榮商店 / 哈密瓜雪糕附近。市場本身 09:00–18:00，但販賣機 24 小時。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=12330348116738524481" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">21:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">BIC CAMERA 難波店 🔌</div>
+              <span class="tag tag-red">22:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">吹風機、3C 商品。退稅櫃檯在 1F。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=3079569960134100646" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">22:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">MEGA 唐吉軻德 新世界店 🛍️</div>
+              <span class="tag tag-green">09:00–05:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">夜間壓軸！藥妝、零食、雜貨、飯糰一次買齊。開到凌晨 5:00，不用趕。</div>
+            <div class="info-row"><span class="info-icon">🍙</span><span>可在這買飯糰隔天吃，或任何便利商店也都有</span></div>
+            <a class="map-link" href="https://maps.google.com/?cid=2121925305193172985" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">23:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回 Orange Hotel 休息 🏨</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">從新世界步行回難波約 15 分鐘。整理戰利品、早點休息。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🛍️ 備用清單（視時間加入）</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">彈性</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">可去可不去的店</div>
+              <span class="tag tag-purple">時間夠再去</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <button class="collapsible-toggle" style="border-top:none;padding:0 0 4px;" onclick="toggleCollapsible(this)">展開查看 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">Bookoff Plus 難波戎橋店（二手書、動漫）</div><div class="alt-meta">依官網</div></div>
+            <div class="alt-item"><div class="alt-name">Can*Do 百元店（道頓堀左邊）</div><div class="alt-meta">依官網</div></div>
+            <div class="alt-item"><div class="alt-name">大國藥妝（京都已去 OS 可跳過）</div><div class="alt-meta">21:00–23:50</div></div>
+            <div class="alt-item"><div class="alt-name">Donki 拍照（MEGA 唐吉軻德就是 Donki）</div><div class="alt-meta">24小時</div></div>
+            <div class="alt-item"><div class="alt-name">高島屋大阪店（B1F 熟食區可買飯糰）</div><div class="alt-meta">10:00–20:00</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 4 ═══════════════ -->
+<div class="day-panel" id="day3">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 4</div>
+      <div class="day-date">5月29日（五）</div>
+      <div class="day-theme">勝尾寺 · 大阪城 · 心齋橋購物</div>
+    </div>
+    <div class="day-weather">🏯</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>關鍵截止：</strong>Mel Coffee 18:00・橘街所有店 20:00・心齋橋 PARCO 20:00</div>
+  </div>
+
+  <div class="section-label">☀️ 上午 — 勝尾寺半日遊</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">07:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">起床、711 買早餐</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">08:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">出發前往勝尾寺 🚇</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">惠美須町 → 動物園前 → 箕面萱野（地鐵御堂筋線）→ 搭公車至勝尾寺。</div>
+            <div class="info-row"><span class="info-icon">⚠️</span><span>公車 ¥800 單程，僅收 IC 卡，30 分鐘一班！</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">09:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">勝尾寺 ⛩️ 達磨不倒翁聖地</div>
+              <span class="tag tag-blue">08:00–17:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">大阪最強勝運寺廟！數千個紅色達磨不倒翁超壯觀。蓋章、拍照、買小禮物。⚠️ 提前買票。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=963425562183482676" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:50</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">午餐：北海素材 回轉壽司 🍣</div>
+              <span class="tag tag-green">11:00–22:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">箕面萱野 Q's Mall Station 1 棟 3F。機器人送餐！不用吃太飽，下午要吃布丁。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=5831879356804572988" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚇&nbsp; 箕面萱野 → 本町 → 谷町四丁目（地鐵約 45 分鐘）
+    </div>
+  </div>
+
+  <div class="section-label">🍮 下午 — 大阪城 &amp; 布丁</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">13:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">OSA Coffee Parks 吃布丁 🍮</div>
+              <span class="tag tag-blue">08:00–19:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">大阪名物布丁！需點飲料才能點甜點。⚠️ 僅收卡，不收現金/Suica。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=9127384148746911409" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">14:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">大阪城天守閣 🏯</div>
+              <span class="tag tag-blue">09:00–18:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">可用周遊券。柯南照片打卡！搭小火車減少走路。最後入場 17:30。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=4831865609044200129" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 16px 4px;">
+    <div class="transport-row">
+      🚇&nbsp; 谷町四丁目 → 心齋橋（地鐵約 10 分鐘）
+    </div>
+  </div>
+
+  <div class="section-label">🍜 傍晚 — 心齋橋美食 &amp; 代購</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">16:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">晚餐：にし家 烏龍麵 🍜</div>
+              <span class="tag tag-green">11:00–22:30</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">TWICE Sana 推薦老店！提早吃避開人潮，可能需排隊 15 分鐘。日曜 –22:00。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=5828690122982257258" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:30</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⭐ Mel Coffee Roasters 代購 ☕</div>
+              <span class="tag tag-red">18:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">代購咖啡豆（中淺焙、酸味）。⚠️ 週五有開，週一公休。當天最早關門的店！</div>
+            <a class="map-link" href="https://maps.google.com/?cid=7228361764195579680" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">18:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">藍瓶咖啡 心齋橋店 代購 ☕</div>
+              <span class="tag tag-blue">08:00–20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">代購櫻花杯。藍瓶品質穩定。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=5904308798587092148" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🛍️ 晚上 — 橘街 &amp; 心齋橋購物</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">18:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">橘街購物 🛍️</div>
+              <span class="tag tag-red">全部 20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">橘街店鋪清單</div>
+              <div class="alt-item">
+                <div class="alt-name">Liberty Walk OSAKA（改裝車衣服、帽子）</div>
+                <div class="alt-meta">11:00–20:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">SORA 選物店（戶外品牌、選物）</div>
+                <div class="alt-meta">11:00–20:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">In Horieten（好看的招財貓）</div>
+                <div class="alt-meta">11:00–20:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">THE H.W.DOG&CO.OSAKA（帽子專門店）</div>
+                <div class="alt-meta">12:00–20:00</div>
+              </div>
+            </div>
+            <a class="map-link" href="https://maps.google.com/?cid=2021154551672476787" target="_blank">📍 Liberty Walk Google Maps</a>
+            <a class="map-link" href="https://maps.google.com/?cid=8278717002476842389" target="_blank">📍 SORA Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">20:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">心齋橋 PARCO 🏬</div>
+              <span class="tag tag-red">20:00 關門</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">150+ 店鋪，每店可退稅。B2 美食中心營業較晚。上樓層 10:00–20:00。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=4448462780053158731" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">21:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">玉出超市 深夜補貨 🛒</div>
+              <span class="tag tag-green">24小時</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">島之內分店，離 Orange Hotel 步行 10 分鐘。超便宜！深夜還有進一步折扣。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=13186746960932717421" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">22:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回 Orange Hotel 收拾行李 🏨</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">整理戰利品，準備隔天前往梅田。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🛍️ 備用清單（視時間加入）</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">彈性</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">備用選項</div>
+              <span class="tag tag-purple">時間夠再去</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <button class="collapsible-toggle" style="border-top:none;padding:0 0 4px;" onclick="toggleCollapsible(this)">展開查看 <span class="arrow">▼</span></button>
+          </div>
+          <div class="collapsible-body">
+            <div class="alt-item"><div class="alt-name">梅田藍天大廈（持周遊券 15:00 前免費，之後 ¥2,000 打8折）</div><div class="alt-meta">09:30–22:00</div></div>
+            <div class="alt-item"><div class="alt-name">雞Soba座銀 拉麵（在江戶堀，離心齋橋遠）</div><div class="alt-meta">10:30–22:00</div></div>
+            <div class="alt-item"><div class="alt-name">OS Drug 心齋橋店（Day 3 已去可跳過）</div><div class="alt-meta">–19:50</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 5 ═══════════════ -->
+<div class="day-panel" id="day4">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 5</div>
+      <div class="day-date">5月30日（六）</div>
+      <div class="day-theme">梅田購物天堂 · 全日百貨巡禮</div>
+    </div>
+    <div class="day-weather">🛍️</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>關鍵時間：</strong>飯糰 Gorichan 10:30 避開人潮・所有百貨 20:00 關門（Yodobashi 22:00）</div>
+  </div>
+
+  <div class="section-label">☀️ 上午 — 退房 &amp; 移動梅田</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">起床、整理行李</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">08:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">附近早餐</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">便利商店或咖啡廳簡單吃。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">09:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">Orange Hotel 難波退房 🏨</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">搭地鐵御堂筋線至梅田站（約 10 分鐘）。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">關西飯店 Check-in</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">東梅田站步行 5 分鐘，JR 大阪站步行 10 分鐘。放行李、輕裝出發。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=6489988779039540814" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">中崎町 飯糰 Gorichan 🍙</div>
+              <span class="tag tag-green">07:00–20:30</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">飯糰 x 茶泡飯！超人氣，評分 4.9（12,546 則）。⚠️ 10:30 去避開午餐人潮，約 12 座位。11:00 後排隊可能 40+ 分鐘。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=5273802679295432360" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🛍️ 下午 — 梅田購物第一輪</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⭐ 大丸百貨 13F 領 Nintendo 整理券</div>
+              <span class="tag tag-blue">10:00–20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">先衝 13F 領整理券！若可直接入場就先逛完 Nintendo OSAKA + Pokemon Center，不然先去阪急。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=198368065973321956" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">阪急百貨購物 🏬</div>
+              <span class="tag tag-blue">10:00–20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">購物清單</div>
+              <div class="alt-item">
+                <div class="alt-name">⚠️ B1 領外國人 95 折券、Grand Calbee、Baton D'or、CORORO（先買洋芋片避免缺貨！）</div>
+                <div class="alt-meta">B1</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">1F 精品（Dior / Chanel 皮夾）</div>
+                <div class="alt-meta">1F</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">3F SHIRO 香水</div>
+                <div class="alt-meta">3F</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">9F 星巴克買飲料</div>
+                <div class="alt-meta">9F</div>
+              </div>
+            </div>
+            <a class="map-link" href="https://maps.google.com/?cid=13590576495565490093" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">14:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">HEP FIVE 購物 🎡</div>
+              <span class="tag tag-green">11:00–21:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">📷 門口紅色摩天輪、領 ¥500 折價券。B1 Chiikawa、PLAZA；1F BEAMS、niko and；4F Disney；8-9F Bandai Namco 扭蛋。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=7311547120174286369" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">15:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">大丸百貨回訪 13F Nintendo OSAKA 🎮</div>
+              <span class="tag tag-blue">10:00–20:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">依整理券時間入場。走二樓天橋回 JR 大阪站建築，避開地面紅綠燈迷宮。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=10144986234021347845" target="_blank">📍 Nintendo OSAKA Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🍜 傍晚 — LUCUA &amp; 晚餐</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:00</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">LUCUA + LUCUA 1100 🏬</div>
+              <span class="tag tag-blue">10:30–20:30</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">18:00–19:00 在 B2 Food Hall LUCUA 1100 吃晚餐。</div>
+            <div class="alt-section">
+              <div class="alt-label">購物樓層</div>
+              <div class="alt-item">
+                <div class="alt-name">2F ReFa、JO MALONE</div>
+                <div class="alt-meta">LUCUA 1100</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">3F @cosme</div>
+                <div class="alt-meta">LUCUA 1100</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">1F Converse、2F Clane、3F Beams</div>
+                <div class="alt-meta">LUCUA 本館</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">8F 無印、3COINS；9F Loft</div>
+                <div class="alt-meta">LUCUA 本館</div>
+              </div>
+            </div>
+            <a class="map-link" href="https://maps.google.com/?cid=7138839288115191113" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🌙 晚上 — 友都八喜 &amp; LINKS UMEDA</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">20:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">友都八喜 Yodobashi 🔌</div>
+              <span class="tag tag-green">09:30–22:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">1-7F 電器、5F 扭蛋。壓軸去，營業到 22:00！</div>
+            <a class="map-link" href="https://maps.google.com/?cid=17881692208387198900" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">20:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">LINKS UMEDA 🏢</div>
+              <span class="tag tag-blue">10:00–21:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">1-4F UNIQLO、B1-B2 GU、B1 美食街（與梅田站連通）。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=11887766625558300801" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">22:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">返回關西飯店休息 🏨</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">步行回飯店，整理戰利品。明天是最後一天！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ DAY 6 ═══════════════ -->
+<div class="day-panel" id="day5">
+  <div class="day-banner">
+    <div class="day-banner-left">
+      <div class="day-number">Day 6</div>
+      <div class="day-date">5月31日（日）</div>
+      <div class="day-theme">最後一天 · 露天神社 · 返台</div>
+    </div>
+    <div class="day-weather">✈️</div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>航班：</strong>星宇 JX823 15:10 起飛・郵局週日 18:00 關門・巴士 11:28 發車務必準時</div>
+  </div>
+
+  <div class="section-label">🌅 清晨 — 露天神社</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">起床</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">06:30</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">露天神社（お初天神）⛩️</div>
+              <span class="tag tag-green">06:00–23:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">戀愛運水籤、蕾絲御守。從關西飯店步行 5 分鐘。早晨人少拍照美！</div>
+            <a class="map-link" href="https://maps.google.com/?cid=791887690026767700" target="_blank">📍 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">07:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">附近早餐 + 散步 ☕</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">梅田一帶咖啡廳、便利商店。吃好吃的早餐！或回飯店用餐。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">📮 上午 — 郵局寄件</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">09:00</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card warning-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">大阪中央郵局 📮</div>
+              <span class="tag tag-red">週日 18:00</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">寄禮物給媽媽、寄包裹回台灣。⚠️ 週日營業到 18:00（週一至五 19:00、週六 18:00）。從關西飯店步行 8 分鐘。</div>
+            <div class="info-row"><span class="info-icon">📦</span><span>JP Tower 大阪 1F，平日 09:00–19:00</span></div>
+            <a class="map-link" href="https://maps.google.com/?cid=2661109850859005269" target="_blank">📍 Google Maps</a>
+            <a class="map-link" href="https://www.funliday.com/posts/japan-travel-info-post-office/" target="_blank">📖 寄包裹教學</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">關西飯店退房 🏨</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">10:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">午餐（二擇一）</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alt-section">
+              <div class="alt-label">選項</div>
+              <div class="alt-item">
+                <div class="alt-name">方案 A：郵局附近早午餐（梅田車站周邊選擇多）</div>
+                <div class="alt-meta">10:00–11:00</div>
+              </div>
+              <div class="alt-item">
+                <div class="alt-name">方案 B：便利商店買便當，巴士上吃</div>
+                <div class="alt-meta">10:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🚌 中午 — 前往關西機場</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:13</div>
+        <div class="tl-dot warning"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card danger-card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⚠️ 抵達利木津巴士站 Herbis Osaka</div>
+              <span class="tag tag-red">提前15分鐘</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">從關西飯店步行 10 分鐘至 Herbis Osaka 地下 1 樓。⚠️ 11:28 發車，提前 15 分鐘到達購票！</div>
+            <a class="map-link" href="https://maps.google.com/?cid=2959854348851184668" target="_blank">📍 Google Maps</a>
+            <a class="map-link" href="https://www.kate.co.jp/tcn/timetable/detail/UM" target="_blank">🕐 利木津巴士時刻表</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:28</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">⭐ 利木津巴士發車（推薦）</div>
+              <span class="tag tag-blue">車程 80 分鐘</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">大阪站前 → 關西機場 T1，¥1,800 現場購票。12:50 抵達機場，時間充裕。</div>
+            <div class="info-row"><span class="info-icon">🎫</span><span>可寄放 2 件行李，現場購票即可</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">11:48</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">備用班次（較趕）</div>
+              <span class="tag tag-amber">13:10 抵達</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">若錯過 11:28，可搭 11:48。但 13:10 抵達機場，時間較緊迫。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">✈️ 下午 — 機場 &amp; 返台</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">12:50</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">抵達關西機場 T1 🛫</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">星宇航空櫃檯辦理登機、託運行李。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">13:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">退稅、安檢、候機</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">辦理退稅手續、通過安檢。機場免稅店逛逛，準備登機。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">15:10</div>
+        <div class="tl-dot priority"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">✈️ 星宇航空 JX823 起飛</div>
+              <span class="tag tag-blue">訂票 EIK9Y5</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">關西機場 KIX → 台灣，飛行時間約 2 小時。</div>
+            <a class="map-link" href="https://maps.google.com/?cid=17300817681493622785" target="_blank">📍 關西機場 T1 Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">17:05</div>
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">🏠 抵達台灣！</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">京都大阪六日遊圓滿結束！期待下次旅行 ✨</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">🔄 備用方案</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-time">備案</div>
+        <div class="tl-dot transport"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <div class="card-title">方案 B：JR Haruka</div>
+              <span class="tag tag-purple">約 50 分鐘</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-desc">如果利木津巴士客滿，可改搭 JR Haruka 特急。從大阪站或新大阪站出發，約 50 分鐘抵達機場。需拖行李轉車較累。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary bar -->
+<div class="summary-bar" id="summaryBar">
+  <div class="summary-item">
+    <span class="summary-value" id="sb-date">5/26 (二)</span>
+    <span class="summary-key">日期</span>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <span class="summary-value" id="sb-key1">17:00</span>
+    <span class="summary-key" id="sb-key1-label">和服歸還</span>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-item">
+    <span class="summary-value" id="sb-key2">19:45</span>
+    <span class="summary-key" id="sb-key2-label">OS藥妝關門</span>
+  </div>
+</div>
+
+<script>
+const days = [
+  { date: '5/26 (二)', k1: '17:00', k1l: '和服歸還', k2: '19:45', k2l: 'OS藥妝關門' },
+  { date: '5/27 (三)', k1: '16:10', k1l: '平等院入場', k2: '17:00', k2l: '中村藤吉' },
+  { date: '5/28 (四)', k1: '13:00', k1l: '木津市場', k2: '19:50', k2l: 'OS Drug' },
+  { date: '5/29 (五)', k1: '18:00', k1l: 'Mel Coffee', k2: '20:00', k2l: '橘街關門' },
+  { date: '5/30 (六)', k1: '10:30', k1l: '飯糰避人潮', k2: '20:00', k2l: '百貨關門' },
+  { date: '5/31 (日)', k1: '11:28', k1l: '巴士發車', k2: '15:10', k2l: '飛機起飛' },
+];
+
+function switchDay(idx) {
+  document.querySelectorAll('.day-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.day-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  const d = days[idx];
+  document.getElementById('sb-date').textContent = d.date;
+  document.getElementById('sb-key1').textContent = d.k1;
+  document.getElementById('sb-key1-label').textContent = d.k1l;
+  document.getElementById('sb-key2').textContent = d.k2;
+  document.getElementById('sb-key2-label').textContent = d.k2l;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleCollapsible(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling || btn.parentElement.nextElementSibling;
+  if (body && body.classList.contains('collapsible-body')) {
+    body.classList.toggle('open');
+  }
+}
+</script>
+</body>
+</html>
